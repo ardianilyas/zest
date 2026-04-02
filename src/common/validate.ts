@@ -1,16 +1,11 @@
-import type { Request, Response, NextFunction } from "express";
 import type { z } from "zod";
 
-export function validate(schema: z.ZodType) {
-  return (req: Request, _res: Response, next: NextFunction): void => {
-    const result = schema.safeParse(req.body);
+export function validate<T extends z.ZodType>(schema: T, data: unknown): z.infer<T> {
+  const result = schema.safeParse(data);
 
-    if (!result.success) {
-      next(result.error);
-      return;
-    }
+  if (!result.success) {
+    throw result.error;
+  }
 
-    req.body = result.data;
-    next();
-  };
+  return result.data;
 }

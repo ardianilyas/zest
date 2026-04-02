@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { env } from "../../config/env";
-import { UnauthorizedException } from "../../common/http-exception";
-import { AUTH_ERROR_MESSAGES, COOKIE_NAME } from "./auth.constant";
-import type { JwtPayload } from "./auth.dto";
+import { env } from "../config/env";
+import { UnauthorizedException } from "../common/http-exception";
+import { AUTH_ERROR_MESSAGES, COOKIE_NAME } from "../features/auth/auth.constant";
+import type { JwtPayload } from "../features/auth/auth.dto";
 
 declare global {
   namespace Express {

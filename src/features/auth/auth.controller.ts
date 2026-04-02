@@ -1,14 +1,15 @@
 import type { Request, Response, NextFunction } from "express";
 import { COOKIE_NAME, COOKIE_MAX_AGE_MS } from "./auth.constant";
 import type { AuthService } from "./auth.service";
-import type { LoginDto, RegisterDto } from "./auth.dto";
+import { loginSchema, registerSchema } from "./auth.dto";
+import { validate } from "../../common/validate";
 
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   register = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const dto = req.body as RegisterDto;
+      const dto = validate(registerSchema, req.body);
       const result = await this.authService.register(dto);
       this.setTokenCookie(res, result.token);
       res.status(201).json({ user: result.user });
@@ -19,7 +20,7 @@ export class AuthController {
 
   login = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const dto = req.body as LoginDto;
+      const dto = validate(loginSchema, req.body);
       const result = await this.authService.login(dto);
       this.setTokenCookie(res, result.token);
       res.status(200).json({ user: result.user });
