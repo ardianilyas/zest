@@ -1,14 +1,15 @@
 import { z } from "zod";
 import { userRoleEnum } from "../../db/schema";
+import { ZOD_ERROR_MESSAGE } from "./auth.constant";
 
 export const registerSchema = z.object({
-  email: z.email("Invalid email format"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.email(ZOD_ERROR_MESSAGE.EMAIL_INVALID),
+  password: z.string().min(8, ZOD_ERROR_MESSAGE.PASSWORD_INVALID),
 });
 
 export const loginSchema = z.object({
-  email: z.email("Invalid email format"),
-  password: z.string().min(1, "Password is required"),
+  email: z.email(ZOD_ERROR_MESSAGE.EMAIL_INVALID),
+  password: z.string().min(1, ZOD_ERROR_MESSAGE.PASSWORD_REQUIRED),
 });
 
 export type RegisterDto = z.infer<typeof registerSchema>;
