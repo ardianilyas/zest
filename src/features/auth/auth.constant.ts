@@ -14,9 +14,20 @@ export const AUTH_ERROR_MESSAGES = {
   USER_NOT_FOUND: "User not found",
 } as const;
 
+export const API_BASE_PATH = "/api";
+
+export const AUTH_BASE_PATH = `${API_BASE_PATH}/auth`;
+
 export const AUTH_ROUTES = {
   REGISTER: "/register",
   LOGIN: "/login",
   LOGOUT: "/logout",
   ME: "/me",
+} as const;
+
+export const AUTH_FULL_ROUTES = {
+  REGISTER: `${AUTH_BASE_PATH}${AUTH_ROUTES.REGISTER}`,
+  LOGIN: `${AUTH_BASE_PATH}${AUTH_ROUTES.LOGIN}`,
+  LOGOUT: `${AUTH_BASE_PATH}${AUTH_ROUTES.LOGOUT}`,
+  ME: `${AUTH_BASE_PATH}${AUTH_ROUTES.ME}`,
 } as const;
