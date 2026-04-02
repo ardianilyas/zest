@@ -37,13 +37,14 @@ export class AuthService {
       .returning({
         id: users.id,
         email: users.email,
+        role: users.role,
       });
 
     if (!newUser) {
       throw new Error("Failed to create user");
     }
 
-    const token = this.generateToken({ userId: newUser.id, email: newUser.email });
+    const token = this.generateToken({ userId: newUser.id, email: newUser.email, role: newUser.role });
 
     return { user: newUser, token };
   }
@@ -65,10 +66,10 @@ export class AuthService {
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
-    const token = this.generateToken({ userId: user.id, email: user.email });
+    const token = this.generateToken({ userId: user.id, email: user.email, role: user.role });
 
     return {
-      user: { id: user.id, email: user.email },
+      user: { id: user.id, email: user.email, role: user.role },
       token,
     };
   }
@@ -78,6 +79,7 @@ export class AuthService {
       .select({
         id: users.id,
         email: users.email,
+        role: users.role,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       })

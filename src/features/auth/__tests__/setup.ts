@@ -19,7 +19,7 @@ beforeAll(async () => {
 
 afterEach(async () => {
   const db = drizzle(pool);
-  await db.execute(sql`TRUNCATE TABLE users RESTART IDENTITY CASCADE`);
+  await db.execute(sql`TRUNCATE TABLE comments, task_labels, tasks, labels, project_members, projects, users RESTART IDENTITY CASCADE`);
 });
 
 afterAll(async () => {

@@ -30,6 +30,7 @@ describe("Auth Feature", () => {
       expect(res.status).toBe(201);
       expect(res.body.user).toHaveProperty("id");
       expect(res.body.user.email).toBe(TEST_USER.email);
+      expect(res.body.user.role).toBe("USER");
       expect(extractCookie(res)).toBeDefined();
     });
 
@@ -82,6 +83,7 @@ describe("Auth Feature", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.user.email).toBe(TEST_USER.email);
+      expect(res.body.user.role).toBe("USER");
       expect(extractCookie(res)).toBeDefined();
     });
 
@@ -135,6 +137,7 @@ describe("Auth Feature", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.user.email).toBe(TEST_USER.email);
+      expect(res.body.user.role).toBe("USER");
       expect(res.body.user).toHaveProperty("createdAt");
       expect(res.body.user).toHaveProperty("updatedAt");
     });
