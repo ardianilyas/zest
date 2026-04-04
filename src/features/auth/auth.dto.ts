@@ -16,7 +16,7 @@ export type RegisterDto = z.infer<typeof registerSchema>;
 export type LoginDto = z.infer<typeof loginSchema>;
 
 export interface JwtPayload {
-  userId: number;
+  userId: string;
   email: string;
   role: (typeof userRoleEnum.enumValues)[number];
 }

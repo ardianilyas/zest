@@ -74,7 +74,7 @@ export class AuthService {
     };
   }
 
-  async getUserById(userId: number) {
+  async getUserById(userId: string) {
     const [user] = await this.db
       .select({
         id: users.id,
