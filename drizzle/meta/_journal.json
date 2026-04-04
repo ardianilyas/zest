@@ -12,8 +12,15 @@
     {
       "idx": 1,
       "version": "7",
-      "when": 1775111379518,
-      "tag": "0001_robust_ares",
+      "when": 1775281511574,
+      "tag": "0001_mighty_shriek",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775281769932,
+      "tag": "0002_long_jackpot",
       "breakpoints": true
     }
   ]

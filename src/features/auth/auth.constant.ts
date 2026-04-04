@@ -1,6 +1,9 @@
 // JWT
 export const JWT_EXPIRES_IN = "3d";
 
+// BCRYPT
+export const BCRYPT_SALT_ROUNDS = 10;
+
 // COOKIE
 export const COOKIE_NAME = "access_token";
 export const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in ms

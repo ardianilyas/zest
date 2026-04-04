@@ -1,23 +1,23 @@
 import {
-  integer,
   pgEnum,
   pgTable,
-  primaryKey,
-  serial,
   text,
   timestamp,
   varchar,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export const userRoleEnum = pgEnum("user_role", ["USER", "ADMIN"]);
+export const userRoleEnum = pgEnum("user_role", ["USER", "ADMIN", "AGENT"]);
+export const ticketStatusEnum = pgEnum("ticket_status", ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]);
+export const ticketPriorityEnum = pgEnum("ticket_priority", ["LOW", "MEDIUM", "HIGH", "URGENT"]);
 
 // ─── Users ───────────────────────────────────────────────────────────────────
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   password: text("password").notNull(),
   role: userRoleEnum("role").default("USER").notNull(),
@@ -26,160 +26,99 @@ export const users = pgTable("users", {
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
-  projectMembers: many(projectMembers),
-  assignedTasks: many(tasks, { relationName: "assignee" }),
-  createdTasks: many(tasks, { relationName: "creator" }),
-  comments: many(comments),
+  reportedTickets: many(tickets, { relationName: "reporter" }),
+  assignedTickets: many(tickets, { relationName: "assignee" }),
+  ticketComments: many(ticketComments),
 }));
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
-// ─── Projects ────────────────────────────────────────────────────────────────
+// ─── Categories ──────────────────────────────────────────────────────────────
 
-export const projects = pgTable("projects", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
+export const categories = pgTable("categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
   description: text("description"),
-  status: varchar("status", { length: 50 }).default("ACTIVE").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const projectsRelations = relations(projects, ({ many }) => ({
-  members: many(projectMembers),
-  tasks: many(tasks),
+export const categoriesRelations = relations(categories, ({ many }) => ({
+  tickets: many(tickets),
 }));
 
-export type Project = typeof projects.$inferSelect;
-export type NewProject = typeof projects.$inferInsert;
+export type Category = typeof categories.$inferSelect;
+export type NewCategory = typeof categories.$inferInsert;
 
-// ─── Project Members (junction) ─────────────────────────────────────────────
+// ─── Tickets ─────────────────────────────────────────────────────────────────
 
-export const projectMembers = pgTable("project_members", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id")
+export const tickets = pgTable("tickets", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  status: ticketStatusEnum("status").default("OPEN").notNull(),
+  priority: ticketPriorityEnum("priority").default("MEDIUM").notNull(),
+  categoryId: uuid("category_id")
+    .notNull()
+    .references(() => categories.id, { onDelete: "restrict" }),
+  reporterId: uuid("reporter_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  projectId: integer("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  projectRole: varchar("project_role", { length: 100 }),
-  joinedAt: timestamp("joined_at").defaultNow().notNull(),
-});
-
-export const projectMembersRelations = relations(projectMembers, ({ one }) => ({
-  user: one(users, { fields: [projectMembers.userId], references: [users.id] }),
-  project: one(projects, {
-    fields: [projectMembers.projectId],
-    references: [projects.id],
-  }),
-}));
-
-export type ProjectMember = typeof projectMembers.$inferSelect;
-export type NewProjectMember = typeof projectMembers.$inferInsert;
-
-// ─── Tasks ───────────────────────────────────────────────────────────────────
-
-export const tasks = pgTable("tasks", {
-  id: serial("id").primaryKey(),
-  title: varchar("title", { length: 255 }).notNull(),
-  description: text("description"),
-  status: varchar("status", { length: 50 }).default("TODO").notNull(),
-  priority: varchar("priority", { length: 50 }).default("MEDIUM").notNull(),
-  projectId: integer("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  assigneeId: integer("assignee_id").references(() => users.id, {
+  assigneeId: uuid("assignee_id").references(() => users.id, {
     onDelete: "set null",
   }),
-  createdById: integer("created_by_id")
-    .notNull()
-    .references(() => users.id),
-  dueDate: timestamp("due_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  resolvedAt: timestamp("resolved_at"),
 });
 
-export const tasksRelations = relations(tasks, ({ one, many }) => ({
-  project: one(projects, {
-    fields: [tasks.projectId],
-    references: [projects.id],
+export const ticketsRelations = relations(tickets, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [tickets.categoryId],
+    references: [categories.id],
+  }),
+  reporter: one(users, {
+    fields: [tickets.reporterId],
+    references: [users.id],
+    relationName: "reporter",
   }),
   assignee: one(users, {
-    fields: [tasks.assigneeId],
+    fields: [tickets.assigneeId],
     references: [users.id],
     relationName: "assignee",
   }),
-  creator: one(users, {
-    fields: [tasks.createdById],
-    references: [users.id],
-    relationName: "creator",
-  }),
-  taskLabels: many(taskLabels),
-  comments: many(comments),
+  comments: many(ticketComments),
 }));
 
-export type Task = typeof tasks.$inferSelect;
-export type NewTask = typeof tasks.$inferInsert;
+export type Ticket = typeof tickets.$inferSelect;
+export type NewTicket = typeof tickets.$inferInsert;
 
-// ─── Labels ──────────────────────────────────────────────────────────────────
+// ─── Ticket Comments ─────────────────────────────────────────────────────────
 
-export const labels = pgTable("labels", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 100 }).notNull().unique(),
-  color: varchar("color", { length: 20 }),
-});
-
-export const labelsRelations = relations(labels, ({ many }) => ({
-  taskLabels: many(taskLabels),
-}));
-
-export type Label = typeof labels.$inferSelect;
-export type NewLabel = typeof labels.$inferInsert;
-
-// ─── Task Labels (many-to-many junction) ─────────────────────────────────────
-
-export const taskLabels = pgTable(
-  "task_labels",
-  {
-    taskId: integer("task_id")
-      .notNull()
-      .references(() => tasks.id, { onDelete: "cascade" }),
-    labelId: integer("label_id")
-      .notNull()
-      .references(() => labels.id, { onDelete: "cascade" }),
-  },
-  (t) => [primaryKey({ columns: [t.taskId, t.labelId] })],
-);
-
-export const taskLabelsRelations = relations(taskLabels, ({ one }) => ({
-  task: one(tasks, { fields: [taskLabels.taskId], references: [tasks.id] }),
-  label: one(labels, { fields: [taskLabels.labelId], references: [labels.id] }),
-}));
-
-export type TaskLabel = typeof taskLabels.$inferSelect;
-export type NewTaskLabel = typeof taskLabels.$inferInsert;
-
-// ─── Comments ────────────────────────────────────────────────────────────────
-
-export const comments = pgTable("comments", {
-  id: serial("id").primaryKey(),
+export const ticketComments = pgTable("ticket_comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
   content: text("content").notNull(),
-  taskId: integer("task_id")
+  ticketId: uuid("ticket_id")
     .notNull()
-    .references(() => tasks.id, { onDelete: "cascade" }),
-  authorId: integer("author_id")
+    .references(() => tickets.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const commentsRelations = relations(comments, ({ one }) => ({
-  task: one(tasks, { fields: [comments.taskId], references: [tasks.id] }),
-  author: one(users, { fields: [comments.authorId], references: [users.id] }),
+export const ticketCommentsRelations = relations(ticketComments, ({ one }) => ({
+  ticket: one(tickets, {
+    fields: [ticketComments.ticketId],
+    references: [tickets.id],
+  }),
+  author: one(users, {
+    fields: [ticketComments.authorId],
+    references: [users.id],
+  }),
 }));
 
-export type Comment = typeof comments.$inferSelect;
-export type NewComment = typeof comments.$inferInsert;
+export type TicketComment = typeof ticketComments.$inferSelect;
+export type NewTicketComment = typeof ticketComments.$inferInsert;

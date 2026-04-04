@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
 import app from "../../../app";
-import "./setup";
+
 import {
   AUTH_FULL_ROUTES,
   AUTH_ERROR_MESSAGES,
