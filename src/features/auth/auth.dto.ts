@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { userRoleEnum } from "../../db/schema";
-import { ZOD_ERROR_MESSAGE } from "./auth.constant";
+import { ZOD_ERROR_MESSAGE } from "../../constants/zod.constant";
 
 export const registerSchema = z.object({
   email: z.email(ZOD_ERROR_MESSAGE.EMAIL_INVALID),
