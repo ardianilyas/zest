@@ -2,19 +2,13 @@ import { describe, it, expect } from "vitest";
 import request from "supertest";
 import app from "../../../app";
 
-import { AUTH_FULL_ROUTES, COOKIE_NAME } from "../../auth/auth.constant";
 import {
   CATEGORY_FULL_ROUTES,
   CATEGORY_ERROR_MESSAGES,
 } from "../category.constant";
+import { getAdminCookie, registerAndLogin } from "../../../../test/auth";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const ADMIN_USER = {
-  email: "admin@example.com",
-  password: "password123",
-};
-
 const REGULAR_USER = {
   email: "user@example.com",
   password: "password123",
@@ -24,57 +18,6 @@ const TEST_CATEGORY = {
   name: "Bug Report",
   description: "Issues related to bugs",
 };
-
-/**
- * Register a user, then manually promote to ADMIN via direct DB update
- * through the login flow. For test purposes we register then login.
- *
- * Since there's no admin-creation endpoint, we need to set role via DB.
- * We'll use the test DB setup to handle this.
- */
-async function registerAndLogin(
-  user: { email: string; password: string }
-): Promise<string> {
-  const registerRes = await request(app)
-    .post(AUTH_FULL_ROUTES.REGISTER)
-    .send(user);
-
-  const cookies = registerRes.headers["set-cookie"];
-  if (!cookies) throw new Error("No cookie returned from register");
-  const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
-  const cookie = cookieArray.find((c: string) => c.startsWith(COOKIE_NAME));
-  if (!cookie) throw new Error("Auth cookie not found");
-  return cookie;
-}
-
-async function getAdminCookie(): Promise<string> {
-  // Register admin user
-  await request(app)
-    .post(AUTH_FULL_ROUTES.REGISTER)
-    .send(ADMIN_USER);
-
-  // Promote to ADMIN via direct SQL (the test setup pool handles this)
-  const { db } = await import("../../../config/database");
-  const { users } = await import("../../../db/schema");
-  const { eq } = await import("drizzle-orm");
-
-  await db
-    .update(users)
-    .set({ role: "ADMIN" })
-    .where(eq(users.email, ADMIN_USER.email));
-
-  // Login to get a fresh token with ADMIN role
-  const loginRes = await request(app)
-    .post(AUTH_FULL_ROUTES.LOGIN)
-    .send(ADMIN_USER);
-
-  const cookies = loginRes.headers["set-cookie"];
-  if (!cookies) throw new Error("No cookie returned from login");
-  const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
-  const cookie = cookieArray.find((c: string) => c.startsWith(COOKIE_NAME));
-  if (!cookie) throw new Error("Auth cookie not found");
-  return cookie;
-}
 
 async function createCategory(
   cookie: string,
