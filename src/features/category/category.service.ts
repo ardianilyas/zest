@@ -16,7 +16,7 @@ export class CategoryService {
   }
 
   async createCategroy(data: CreateCategoryDto) {
-    return await db.insert(categories).values(data);
+    return await db.insert(categories).values(data).returning();
   }
 
   async updateCategory(id: string, data: UpdateCategoryDto) {
