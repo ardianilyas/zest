@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "../../config/database";
 import { ticketComments, tickets } from "../../db/schema";
-import type { CreateCommentDto, CreateTicketDto, UpdateTicketDto } from "./ticket.dto";
+import type { CreateCommentDto, CreateTicketDto, UpdateTicketDto, UpdateTicketStatusDto } from "./ticket.dto";
 import { NotFoundException } from "../../common/http-exception";
 import { TICKET_ERROR_MESSAGES } from "./ticket.constant";
 
@@ -12,6 +12,10 @@ export class TicketService {
 
   async createComment(ticketId: string, authorId: string, data: CreateCommentDto) {
     return await db.insert(ticketComments).values({ ...data, ticketId, authorId }).returning();
+  }
+
+  async updateTicketStatus(ticketId: string, data: UpdateTicketStatusDto) {
+    return await db.update(tickets).set(data).where(eq(tickets.id, ticketId)).returning();
   }
 
   async getTicketWithComments(ticketId: string) {

@@ -7,9 +7,12 @@ export const createTicketSchema = z.object({
   status: z.enum(ticketStatusEnum.enumValues).optional(),
   priority: z.enum(ticketPriorityEnum.enumValues).optional(),
   categoryId: z.uuid().min(1, { error: "Category is required" }),
-  // reporterId: z.uuid().min(1, { error: "Reporter is required" }),
   assigneeId: z.uuid().optional(),
   resolvedAt: z.date().optional()
+});
+
+export const updateTicketStatusSchema = z.object({
+  status: z.enum(ticketStatusEnum.enumValues)
 });
 
 export const createCommentSchema = z.object({
@@ -20,4 +23,5 @@ export const updateTicketSchema = createTicketSchema.partial();
 
 export type CreateTicketDto = z.infer<typeof createTicketSchema>;
 export type UpdateTicketDto = z.infer<typeof updateTicketSchema>;
+export type UpdateTicketStatusDto = z.infer<typeof updateTicketStatusSchema>;
 export type CreateCommentDto = z.infer<typeof createCommentSchema>;

@@ -3,6 +3,7 @@ import { authGuard } from "../../middlewares/auth.middleware";
 import { TicketService } from "./ticket.service";
 import { TicketController } from "./ticket.controller";
 import { TICKET_ROUTES } from "./ticket.constant";
+import { requireRole } from "../../middlewares/role.middleware";
 
 const router = Router();
 const ticketSetvice = new TicketService();
@@ -18,5 +19,7 @@ router.delete(TICKET_ROUTES.DELETE, ticketController.deleteTicket);
 
 router.get(TICKET_ROUTES.COMMENTS.LIST, ticketController.getTicketComments);
 router.post(TICKET_ROUTES.COMMENTS.CREATE, ticketController.createComment);
+
+router.put(TICKET_ROUTES.UPDATE_STATUS, requireRole("ADMIN"), ticketController.updateTicketStatus);
 
 export default router;

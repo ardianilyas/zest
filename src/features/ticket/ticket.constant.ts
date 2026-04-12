@@ -13,6 +13,7 @@ export const TICKET_ROUTES = {
   CREATE: "/",
   UPDATE: "/:id",
   DELETE: "/:id",
+  UPDATE_STATUS: "/:id/status",
   COMMENTS: {
     LIST: "/:ticketId/comments",
     CREATE: "/:ticketId/comments",
@@ -21,8 +22,12 @@ export const TICKET_ROUTES = {
 
 export const TICKET_FULL_ROUTES = {
   LIST: TICKET_BASE_PATH,
-  byId: (id: string) => `${TICKET_BASE_PATH}/${id}`,
-  create: TICKET_BASE_PATH,
-  update: (id: string) => `${TICKET_BASE_PATH}/${id}`,
-  delete: (id: string) => `${TICKET_BASE_PATH}/${id}`,
+  BY_ID: TICKET_BASE_PATH + TICKET_ROUTES.BY_ID,
+  CREATE: TICKET_BASE_PATH + TICKET_ROUTES.CREATE,
+  UPDATE: TICKET_BASE_PATH + TICKET_ROUTES.UPDATE,
+  DELETE: TICKET_BASE_PATH + TICKET_ROUTES.DELETE,
+  COMMENTS: {
+    LIST: TICKET_BASE_PATH + TICKET_ROUTES.COMMENTS.LIST,
+    CREATE: TICKET_BASE_PATH + TICKET_ROUTES.COMMENTS.CREATE,
+  }
 } as const;
