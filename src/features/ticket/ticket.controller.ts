@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import type { TicketService } from "./ticket.service";
 import { HttpStatus } from "../../constants/http-status.constant";
 import { validate } from "../../common/validate";
-import { createTicketSchema, updateTicketSchema } from "./ticket.dto";
+import { createCommentSchema, createTicketSchema, updateTicketSchema } from "./ticket.dto";
 
 export class TicketController {
   constructor(private ticketService: TicketService) {}
@@ -11,6 +11,27 @@ export class TicketController {
     try {
       const tickets = await this.ticketService.getTickets(req.user?.userId as string);
       return res.status(HttpStatus.OK).json(tickets);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  createComment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = validate(createCommentSchema, req.body);
+      const { ticketId } = req.params;
+      const comment = await this.ticketService.createComment(ticketId as string, req.user?.userId as string, data);
+      return res.status(HttpStatus.CREATED).json(comment);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  getTicketComments = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { ticketId } = req.params;
+      const ticket = await this.ticketService.getTicketWithComments(ticketId as string);
+      return res.status(HttpStatus.OK).json(ticket);
     } catch (error) {
       next(error);
     }
@@ -28,7 +49,8 @@ export class TicketController {
   createTicket = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const data = validate(createTicketSchema, req.body);
-      const ticket = await this.ticketService.createTicket(data);
+      const reporterId = req.user?.userId as string;
+      const ticket = await this.ticketService.createTicket(data, reporterId);
       return res.status(HttpStatus.CREATED).json(ticket);
     } catch (error) {
       next(error);

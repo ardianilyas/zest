@@ -13,6 +13,10 @@ export const TICKET_ROUTES = {
   CREATE: "/",
   UPDATE: "/:id",
   DELETE: "/:id",
+  COMMENTS: {
+    LIST: "/:ticketId/comments",
+    CREATE: "/:ticketId/comments",
+  }
 } as const;
 
 export const TICKET_FULL_ROUTES = {
