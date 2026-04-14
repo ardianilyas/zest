@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "bun --watch src/server.ts",
+    "db:seed": "bun run src/seed/index.ts",
     "test": "vitest run"
   },
   "devDependencies": {
